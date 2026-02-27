@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -21,17 +21,16 @@ interface Movie {
   runtime: string;
   genre: string[];
 }
-
-export default function HomePage() {
+function MovieContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") || "");
 
-  const currentPage = Number(searchParams.get("page")) || 1;
-  const searchParam = searchParams.get("q") || "";
+  const currentPage = Number(searchParams?.get("page")) || 1;
+  const searchParam = searchParams?.get("q") || "";
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -64,8 +63,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (searchQuery !== (searchParams.get("q") || "")) {
-        if (searchQuery.trim()) {
+      if (searchQuery !== (searchParams?.get("q") || "")) {
+        if (searchQuery?.trim()) {
           router.push(`/?q=${encodeURIComponent(searchQuery)}&page=1`);
         } else {
           router.push("/");
@@ -131,7 +130,7 @@ export default function HomePage() {
           </div>
           {!searchParam && (
             <div
-              className=" text-blue-500 font-mono font-bold  bg-blue-500/5 border border-blue-500/10 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm md:text-lg flex items-center justify-center whitespace-nowrap"
+              className=" text-blue-500 font-mono font-bold bg-blue-500/5 border border-blue-500/10 rounded-full px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm md:text-lg flex items-center justify-center whitespace-nowrap"
             >
               <span className="opacity-70 mr-1">Sahifa:</span>
               {currentPage.toString().padStart(2, "0")}
@@ -214,5 +213,13 @@ export default function HomePage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0F172A] flex items-center justify-center text-white font-bold animate-pulse">Yuklanmoqda...</div>}>
+      <MovieContent />
+    </Suspense>
   );
 }
